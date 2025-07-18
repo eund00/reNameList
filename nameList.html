@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>이름 정렬기</title>
+  <style>
+    .name-item {
+      cursor: pointer;
+    }
+    .name-item:hover {
+      background-color: #f0f0f0;
+    }
+    body {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    #copied {
+      color: green;
+      font-size: 0.9em;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h3>세 글자 이름 정렬기</h3>
+  <p>한 줄에 한 명씩 입력 후 정렬 버튼 클릭. 이름을 클릭하면 복사됩니다.</p>
+  <textarea id="input" rows="10" cols="30" placeholder="예: 김민수"></textarea><br />
+  <button onclick="sortNames()">정렬</button>
+  <button onclick="toggleNumbering()">순번 숨기기</button>
+
+  <p id="count">총 이름의 갯수는 0개입니다.</p>
+  <h4>정렬 결과:</h4>
+  <pre id="output"></pre>
+  <div id="copied">복사되었습니다!</div>
+
+  <script>
+    const chosungOrder = [
+      "ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ",
+      "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"
+    ];
+
+    let showNumbering = true;
+
+    function getChosung(char) {
+      const code = char.charCodeAt(0);
+      if (code >= 0xAC00 && code <= 0xD7A3) {
+        const index = Math.floor((code - 0xAC00) / 588);
+        return chosungOrder[index];
+      }
+      return char;
+    }
+
+    function sortNames() {
+      const input = document.getElementById("input").value.trim();
+      const names = input.split('\n').map(name => name.trim()).filter(n => n.length === 3);
+      document.getElementById("count").textContent = `총 이름의 갯수는 ${names.length}개입니다.`;
+
+      names.sort((a, b) => {
+        const aChosung = getChosung(a[0]);
+        const bChosung = getChosung(b[0]);
+        return chosungOrder.indexOf(aChosung) - chosungOrder.indexOf(bChosung);
+      });
+
+      const output = document.getElementById("output");
+      output.innerHTML = "";
+
+      names.forEach((name, idx) => {
+        const line = document.createElement("div");
+        line.className = "name-item";
+        line.textContent = showNumbering ? `${idx + 1}. ${name}` : name;
+        line.addEventListener("click", () => {
+          copyToClipboard(name);
+        });
+        output.appendChild(line);
+      });
+    }
+
+    function toggleNumbering() {
+      showNumbering = !showNumbering;
+      const button = document.querySelector("button[onclick='toggleNumbering()']");
+      button.textContent = showNumbering ? "순번 숨기기" : "순번 보이기";
+      sortNames();
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const copiedEl = document.getElementById("copied");
+        copiedEl.style.display = "inline";
+        setTimeout(() => copiedEl.style.display = "none", 1000);
+      }).catch(err => {
+        console.error("복사 실패:", err);
+      });
+    }
+  </script>
+</body>
+</html>
