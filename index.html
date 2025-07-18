@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css">
   <title>이름 정렬기</title>
   <style>
     .name-item {
@@ -11,9 +12,12 @@
       background-color: #f0f0f0;
     }
     body {
-      max-width: 600px;
-      margin: 0 auto;
+      width: 100vw;
+      height: 100vh;
       text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     #copied {
       color: green;
@@ -21,19 +25,63 @@
       margin-top: 10px;
       display: none;
     }
+    textarea{
+      width: calc(100% - 20px);
+      height: 200px;
+      text-align: center;
+      margin: 15px 0;
+    }
+    .name-item{
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    .name-item._click{
+      background-color: rgb(255, 96, 149);
+      color: #fff
+    }
+    .outline{
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .outline > div {
+      width: 450px;
+      background-color: #cccccc26;
+      padding: 30px 0;
+    }
+    h3{
+      margin-bottom: 30px;
+      font-size: 30px;
+    }
+    #count{
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
-  <h3>세 글자 이름 정렬기</h3>
-  <p>한 줄에 한 명씩 입력 후 정렬 버튼 클릭. 이름을 클릭하면 복사됩니다.</p>
-  <textarea id="input" rows="10" cols="30" placeholder="예: 김민수"></textarea><br />
-  <button onclick="sortNames()">정렬</button>
-  <button onclick="toggleNumbering()">순번 숨기기</button>
-
-  <p id="count">총 이름의 갯수는 0개입니다.</p>
-  <h4>정렬 결과:</h4>
-  <pre id="output"></pre>
-  <div id="copied">복사되었습니다!</div>
+  
+  <div class="main_inner">
+    <h3>세 글자 이름 정렬기</h3>
+    <div class="outline">
+      <div>
+        <p>
+          한 줄에 한 명씩 입력 후 정렬 버튼 클릭하고<br>
+          오른쪽 정렬된 이름을 클릭하면 복사됩니다.
+        </p>
+        <textarea id="input" rows="10" cols="30" placeholder="예: 김민수"></textarea><br />
+        <div class="btn_wrap">
+          <button onclick="sortNames()">정렬</button>
+          <button onclick="toggleNumbering()">순번 숨기기</button>
+        </div>
+        <p id="count">총 이름의 갯수는 0개입니다.</p>
+      </div>
+      <div>
+        <h4>정렬 결과:</h4>
+        <pre id="output"></pre>
+        <div id="copied">복사되었습니다!</div>
+      </div>
+    </div>
+  </div>
 
   <script>
     const chosungOrder = [
@@ -71,7 +119,17 @@
         line.className = "name-item";
         line.textContent = showNumbering ? `${idx + 1}. ${name}` : name;
         line.addEventListener("click", () => {
-          copyToClipboard(name);
+          // 1. 기존 _click 클래스 제거
+          document.querySelectorAll('.name-item').forEach(item => {
+            item.classList.remove('_click');
+          });
+
+          // 2. 현재 클릭한 요소에 _click 클래스 추가
+          line.classList.add('_click');
+
+          // 3. 한글만 복사
+          const koreanText = extractKorean(name);
+          copyToClipboard(koreanText);
         });
         output.appendChild(line);
       });
